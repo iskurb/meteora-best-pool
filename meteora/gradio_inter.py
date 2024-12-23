@@ -86,7 +86,7 @@ async def main(pools):
         result = []
         for item in sorted_data:
             key, value = next(iter(item.items()))
-            result.append(f"{key}: {round(value, 2)}")
+            result.append(f"https://app.meteora.ag/dlmm/{key}  ---  {round(value, 2)}")
 
         return "\n".join(result)
 
