@@ -40,8 +40,8 @@ async def main(pools, volume_5m, volume_h1):
     proxy_chunks = list(chunked(proxy_pools, 30))
     no_proxy_chunks = list(chunked(no_proxy_pools, 30))
 
-    semaphore_proxy = asyncio.Semaphore(10)
-    semaphore_no_proxy = asyncio.Semaphore(10)
+    semaphore_proxy = asyncio.Semaphore(20)
+    semaphore_no_proxy = asyncio.Semaphore(20)
 
     connector_proxy = ProxyConnector.from_url(PROXY_URL)
     connector_no_proxy = aiohttp.TCPConnector()
