@@ -1,6 +1,11 @@
 import asyncio
+
+
 import aiohttp
 from itertools import islice
+
+
+
 import meteora
 from aiohttp_socks import ProxyConnector
 import gradio as gr
@@ -14,16 +19,24 @@ def chunked(iterable, size):
     while chunk := list(islice(iterator, size)):
         yield chunk
 
-# Асинхронная функция для отправки запросов
-async def fetch(session, url, delay=1):
-    try:
-        await asyncio.sleep(delay)
-        async with session.get(url) as response:
-            #print(response.status)
-            return await response.json()
-    except Exception as e:
-        print(f"Error fetching data: {e}")
-        return None
+
+
+
+
+# Функция с повторными попытками
+async def fetch(session, url, retries=5, delay=30):
+    for attempt in range(retries):
+        try:
+            async with session.get(url, headers={'Accept': 'application/json; version=20230302'}) as response:
+                if response.status == 429:
+                    print(f"Received 429, retrying... ({attempt + 1}/{retries})")
+                    await asyncio.sleep(delay)  # Задержка перед повторной попыткой
+                    continue  # Попробовать снова
+                response.raise_for_status()  # Для других ошибок
+                return await response.json()
+        except aiohttp.ClientError as e:
+            print(f"Error fetching data: {e}")
+            return None
 
 # Асинхронная функция с ограничением запросов
 async def limited_fetch(sem, session, url):
@@ -40,8 +53,8 @@ async def main(pools, volume_5m, volume_h1):
     proxy_chunks = list(chunked(proxy_pools, 30))
     no_proxy_chunks = list(chunked(no_proxy_pools, 30))
 
-    semaphore_proxy = asyncio.Semaphore(20)
-    semaphore_no_proxy = asyncio.Semaphore(20)
+    semaphore_proxy = asyncio.Semaphore(2)
+    semaphore_no_proxy = asyncio.Semaphore(2)
 
     connector_proxy = ProxyConnector.from_url(PROXY_URL)
     connector_no_proxy = aiohttp.TCPConnector()
@@ -122,6 +135,7 @@ async def main(pools, volume_5m, volume_h1):
 def run_analysis(volume_5m, volume_h1, min_tvl):
     pools = asyncio.run(meteora.main(int(min_tvl)))
     result = asyncio.run(main(pools, volume_5m, volume_h1))
+    print('все')
     return result
 
 
