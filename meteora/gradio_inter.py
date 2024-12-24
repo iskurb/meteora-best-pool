@@ -1,10 +1,10 @@
 import asyncio
-from turtledemo.penrose import start
+#from turtledemo.penrose import start
 
 import aiohttp
 from itertools import islice
 
-from tomlkit import value
+#from tomlkit import value
 
 import meteora
 from aiohttp_socks import ProxyConnector
