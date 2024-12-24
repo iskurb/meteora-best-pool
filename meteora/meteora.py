@@ -6,7 +6,7 @@ from time import time
 headers = {}
 
 MAX_CONCURRENT_REQUESTS = 100
-limit_total_tvl = 5000
+#limit_total_tvl = 5000
 
 
 async def make_request(session, url):
@@ -21,8 +21,7 @@ async def make_request(session, url):
 
 
 
-async def main():
-    start_time = time()
+async def main(limit_total_tvl):
     Pools = []
     Pairs = []
     tasks = []
@@ -54,25 +53,20 @@ async def main():
                     Pairs.append(pairs)
                     for pool in pairs['pairs']:
                         if float(pool['liquidity']) < limit_total_tvl: continue
-                        Pools.append({'address': pool['address'],
+                        Pools.append({'name':pairs['name'],
+                                      'address': pool['address'],
                                       'base_fee': pool['base_fee_percentage'],
                                       'liquidity': pool['liquidity']})
 
 
 
 
-    print()
+    #print()
     #print(f"Total pairs: {len(Pairs)}")
-    print(f"Total pools: {len(Pools)}")
+    #print(f"Total pools: {len(Pools)}")
 
 
     await asyncio.sleep(1.5)
-
-    end_time = time()
-    elapsed_time = end_time - start_time
-    minutes, seconds = divmod(elapsed_time, 60)
-    #print(f"Time: {int(minutes)}:{seconds:.0f}")
-    #print(Pools)
     return Pools
 
 
